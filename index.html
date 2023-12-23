@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Falling Pixels with Bumping and Debug</title>
+  <title>Falling Pixels with Bumping, Debug, and Pillar Engines</title>
   <style>
     body {
       margin: 0;
@@ -38,11 +38,14 @@
     canvas.height = height;
 
     const pixels = [];
+    const pillarEngines = [];
     const pixelSize = 5;
+    const pillarSize = 20;
     const pixelColor = 'blue';
     let gravity = 0.1;
     let initialSpeedRange = { min: 1, max: 3 };
     let bounceFactor = 0.8;
+    let pillarForce = 0.01;
     let debugMode = false;
 
     class Pixel {
@@ -72,7 +75,30 @@
           this.x = 0;
         }
 
+        // Apply forces from pillar engines
+        pillarEngines.forEach(pillar => {
+          const distance = Math.sqrt((this.x - pillar.x) ** 2 + (this.y - pillar.y) ** 2);
+          const forceDirectionX = (pillar.x - this.x) / distance;
+          const forceDirectionY = (pillar.y - this.y) / distance;
+          const force = pillarForce / (distance * distance);
+
+          this.velocity += force;
+          this.velocity += forceDirectionY;
+        });
+
         this.x += this.velocity;
+      }
+    }
+
+    class Pillar {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+      }
+
+      draw() {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(this.x - pillarSize / 2, this.y - pillarSize / 2, pillarSize, pillarSize);
       }
     }
 
@@ -84,6 +110,10 @@
         pixel.update();
         pixel.draw();
       });
+
+      pillarEngines.forEach(pillar => {
+        pillar.draw();
+      });
     }
 
     function createPixels() {
@@ -93,9 +123,20 @@
       }
     }
 
-    function resetPixels() {
+    function createPillarEngines() {
+      for (let i = 100; i < width; i += 200) {
+        pillarEngines.push(new Pillar(i, height - 50));
+      }
+    }
+
+    function resetParticles() {
       pixels.length = 0;
       createPixels();
+    }
+
+    function resetPillarEngines() {
+      pillarEngines.length = 0;
+      createPillarEngines();
     }
 
     document.getElementById('debugButton').addEventListener('click', () => {
@@ -105,12 +146,15 @@
         initialSpeedRange.min = parseFloat(prompt('Enter min speed:', initialSpeedRange.min));
         initialSpeedRange.max = parseFloat(prompt('Enter max speed:', initialSpeedRange.max));
         bounceFactor = parseFloat(prompt('Enter bounce factor:', bounceFactor));
+        pillarForce = parseFloat(prompt('Enter pillar force:', pillarForce));
 
-        resetPixels();
+        resetParticles();
+        resetPillarEngines();
       }
     });
 
     createPixels();
+    createPillarEngines();
     animate();
   </script>
 </body>
