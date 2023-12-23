@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Falling Pixels with Bumping</title>
+  <title>Falling Pixels with Bumping and Debug</title>
   <style>
     body {
       margin: 0;
@@ -12,10 +12,23 @@
     canvas {
       display: block;
     }
+    #debugButton {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      padding: 10px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
   <canvas id="pixelCanvas"></canvas>
+  <button id="debugButton">Toggle Debug</button>
   <script>
     const canvas = document.getElementById('pixelCanvas');
     const ctx = canvas.getContext('2d');
@@ -27,7 +40,10 @@
     const pixels = [];
     const pixelSize = 5;
     const pixelColor = 'blue';
-    const gravity = 0.1;
+    let gravity = 0.1;
+    let initialSpeedRange = { min: 1, max: 3 };
+    let bounceFactor = 0.8;
+    let debugMode = false;
 
     class Pixel {
       constructor(x, y, velocity) {
@@ -48,7 +64,7 @@
         // Bounce off the bottom of the canvas
         if (this.y + pixelSize > height) {
           this.y = height - pixelSize;
-          this.velocity *= -0.8; // Adjust the bounce factor as needed
+          this.velocity *= -bounceFactor;
         }
 
         // Wrap around the canvas
@@ -72,10 +88,27 @@
 
     function createPixels() {
       for (let i = 0; i < width; i += pixelSize * 2) {
-        const velocity = Math.random() * 2 + 1; // Adjust the initial velocity range as needed
+        const velocity = Math.random() * (initialSpeedRange.max - initialSpeedRange.min) + initialSpeedRange.min;
         pixels.push(new Pixel(i, 0, velocity));
       }
     }
+
+    function resetPixels() {
+      pixels.length = 0;
+      createPixels();
+    }
+
+    document.getElementById('debugButton').addEventListener('click', () => {
+      debugMode = !debugMode;
+      if (debugMode) {
+        gravity = parseFloat(prompt('Enter gravity:', gravity));
+        initialSpeedRange.min = parseFloat(prompt('Enter min speed:', initialSpeedRange.min));
+        initialSpeedRange.max = parseFloat(prompt('Enter max speed:', initialSpeedRange.max));
+        bounceFactor = parseFloat(prompt('Enter bounce factor:', bounceFactor));
+
+        resetPixels();
+      }
+    });
 
     createPixels();
     animate();
