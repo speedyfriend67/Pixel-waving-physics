@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixel Waving with Physics</title>
+  <title>Falling Pixels with Bumping</title>
   <style>
     body {
       margin: 0;
@@ -27,6 +27,7 @@
     const pixels = [];
     const pixelSize = 5;
     const pixelColor = 'blue';
+    const gravity = 0.1;
 
     class Pixel {
       constructor(x, y, velocity) {
@@ -41,13 +42,21 @@
       }
 
       update() {
-        this.y = height / 2 + Math.sin(this.x / 20) * 50; // Adjust the sine wave parameters as needed
-        this.x += this.velocity;
+        this.velocity += gravity;
+        this.y += this.velocity;
+
+        // Bounce off the bottom of the canvas
+        if (this.y + pixelSize > height) {
+          this.y = height - pixelSize;
+          this.velocity *= -0.8; // Adjust the bounce factor as needed
+        }
 
         // Wrap around the canvas
         if (this.x > width) {
           this.x = 0;
         }
+
+        this.x += this.velocity;
       }
     }
 
@@ -62,9 +71,9 @@
     }
 
     function createPixels() {
-      for (let i = 0; i < width; i += pixelSize) {
-        const velocity = 0.1; // Adjust the velocity as needed
-        pixels.push(new Pixel(i, height / 2, velocity));
+      for (let i = 0; i < width; i += pixelSize * 2) {
+        const velocity = Math.random() * 2 + 1; // Adjust the initial velocity range as needed
+        pixels.push(new Pixel(i, 0, velocity));
       }
     }
 
