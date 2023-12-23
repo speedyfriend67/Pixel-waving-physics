@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Falling Pixels with Bumping, Debug, and Pillar Engines</title>
+  <title>Falling Pixels with Bumping, Debug, Pillar Engines, and Pixel Collisions</title>
   <style>
     body {
       margin: 0;
@@ -46,6 +46,7 @@
     let initialSpeedRange = { min: 1, max: 3 };
     let bounceFactor = 0.8;
     let pillarForce = 0.01;
+    let pixelCollisionRadius = 20; // Adjust the collision radius as needed
     let debugMode = false;
 
     class Pixel {
@@ -84,6 +85,34 @@
 
           this.velocity += force;
           this.velocity += forceDirectionY;
+        });
+
+        // Check for collisions with other pixels
+        pixels.forEach(otherPixel => {
+          if (otherPixel !== this) {
+            const distance = Math.sqrt((this.x - otherPixel.x) ** 2 + (this.y - otherPixel.y) ** 2);
+
+            if (distance < pixelCollisionRadius) {
+              // Collision response
+              const angle = Math.atan2(otherPixel.y - this.y, otherPixel.x - this.x);
+              const overlap = pixelCollisionRadius - distance;
+              const offsetX = (overlap / 2) * Math.cos(angle);
+              const offsetY = (overlap / 2) * Math.sin(angle);
+
+              this.x -= offsetX;
+              this.y -= offsetY;
+              otherPixel.x += offsetX;
+              otherPixel.y += offsetY;
+
+              // Adjust velocities for realistic bouncing effect
+              const angleNormal = angle + Math.PI / 2;
+              const thisSpeed = Math.sqrt(this.velocity ** 2);
+              const otherSpeed = Math.sqrt(otherPixel.velocity ** 2);
+
+              this.velocity = thisSpeed * Math.cos(angleNormal);
+              otherPixel.velocity = otherSpeed * Math.cos(angleNormal + Math.PI);
+            }
+          }
         });
 
         this.x += this.velocity;
@@ -147,6 +176,7 @@
         initialSpeedRange.max = parseFloat(prompt('Enter max speed:', initialSpeedRange.max));
         bounceFactor = parseFloat(prompt('Enter bounce factor:', bounceFactor));
         pillarForce = parseFloat(prompt('Enter pillar force:', pillarForce));
+        pixelCollisionRadius = parseFloat(prompt('Enter pixel collision radius:', pixelCollisionRadius));
 
         resetParticles();
         resetPillarEngines();
