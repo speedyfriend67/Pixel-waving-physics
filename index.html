@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Falling Pixels with Bumping, Debug, Pillar Engines, and Pixel Collisions</title>
+  <title>Vertically Falling Pixels with Bumping, Debug, Pillar Engines, and Pixel Collisions</title>
   <style>
     body {
       margin: 0;
@@ -71,15 +71,9 @@
           this.velocity *= -bounceFactor;
         }
 
-        // Wrap around the canvas
-        if (this.x > width) {
-          this.x = 0;
-        }
-
         // Apply forces from pillar engines
         pillarEngines.forEach(pillar => {
           const distance = Math.sqrt((this.x - pillar.x) ** 2 + (this.y - pillar.y) ** 2);
-          const forceDirectionX = (pillar.x - this.x) / distance;
           const forceDirectionY = (pillar.y - this.y) / distance;
           const force = pillarForce / (distance * distance);
 
@@ -96,12 +90,9 @@
               // Collision response
               const angle = Math.atan2(otherPixel.y - this.y, otherPixel.x - this.x);
               const overlap = pixelCollisionRadius - distance;
-              const offsetX = (overlap / 2) * Math.cos(angle);
               const offsetY = (overlap / 2) * Math.sin(angle);
 
-              this.x -= offsetX;
               this.y -= offsetY;
-              otherPixel.x += offsetX;
               otherPixel.y += offsetY;
 
               // Adjust velocities for realistic bouncing effect
@@ -114,8 +105,6 @@
             }
           }
         });
-
-        this.x += this.velocity;
       }
     }
 
@@ -153,39 +142,40 @@
     }
 
     function createPillarEngines() {
-      for (let i = 100; i < width; i += 200) {
-        pillarEngines.push(new Pillar(i, height - 50));
-      }
-    }
+for (let i = 100; i < width; i += 200) {
+pillarEngines.push(new Pillar(i, height - 50));
+}
+}
 
-    function resetParticles() {
-      pixels.length = 0;
-      createPixels();
-    }
+function resetParticles() {
+  pixels.length = 0;
+  createPixels();
+}
 
-    function resetPillarEngines() {
-      pillarEngines.length = 0;
-      createPillarEngines();
-    }
+function resetPillarEngines() {
+  pillarEngines.length = 0;
+  createPillarEngines();
+}
 
-    document.getElementById('debugButton').addEventListener('click', () => {
-      debugMode = !debugMode;
-      if (debugMode) {
-        gravity = parseFloat(prompt('Enter gravity:', gravity));
-        initialSpeedRange.min = parseFloat(prompt('Enter min speed:', initialSpeedRange.min));
-        initialSpeedRange.max = parseFloat(prompt('Enter max speed:', initialSpeedRange.max));
-        bounceFactor = parseFloat(prompt('Enter bounce factor:', bounceFactor));
-        pillarForce = parseFloat(prompt('Enter pillar force:', pillarForce));
-        pixelCollisionRadius = parseFloat(prompt('Enter pixel collision radius:', pixelCollisionRadius));
+document.getElementById('debugButton').addEventListener('click', () => {
+  debugMode = !debugMode;
+  if (debugMode) {
+    gravity = parseFloat(prompt('Enter gravity:', gravity));
+    initialSpeedRange.min = parseFloat(prompt('Enter min speed:', initialSpeedRange.min));
+    initialSpeedRange.max = parseFloat(prompt('Enter max speed:', initialSpeedRange.max));
+    bounceFactor = parseFloat(prompt('Enter bounce factor:', bounceFactor));
+    pillarForce = parseFloat(prompt('Enter pillar force:', pillarForce));
+    pixelCollisionRadius = parseFloat(prompt('Enter pixel collision radius:', pixelCollisionRadius));
 
-        resetParticles();
-        resetPillarEngines();
-      }
-    });
+    resetParticles();
+    resetPillarEngines();
+  }
+});
 
-    createPixels();
-    createPillarEngines();
-    animate();
+createPixels();
+createPillarEngines();
+animate();
+
   </script>
 </body>
 </html>
